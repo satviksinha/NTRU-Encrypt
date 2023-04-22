@@ -2,6 +2,7 @@ from fractions import Fraction as frac
 from operator import add
 from operator import neg
 import random
+import numpy as np
 
 def egcd(a, b):
     x,y, u,v = 0,1, 1,0
@@ -59,13 +60,24 @@ def modPoly(c,k):
   else:
     return [fracMod(x,k) for x in c]
 
+# def multPoly(c1,c2):
+#   order=(len(c1)-1+len(c2)-1)
+#   out=[0]*(order+1)
+#   for i in range(0,len(c1)):
+#     for j in range(0,len(c2)):
+#       out[j+i]=out[j+i]+c1[i]*c2[j]
+#   return trim(out)
+
 def multPoly(c1,c2):
-  order=(len(c1)-1+len(c2)-1)
-  out=[0]*(order+1)
-  for i in range(0,len(c1)):
-    for j in range(0,len(c2)):
-      out[j+i]=out[j+i]+c1[i]*c2[j]
-  return trim(out)
+   #fft optimised
+   n = len(c1) + len(c2) - 1
+   c1_pad = np.pad(c1, (0, n - len(c1)), 'constant')
+   c2_pad = np.pad(c2, (0, n - len(c2)), 'constant')
+   c1_fft = np.fft.fft(c1_pad)
+   c2_fft = np.fft.fft(c2_pad)
+   out_ftt = c1_fft * c2_fft
+   out = np.fft.ifft(out_ftt).real
+   return trim(out)
 
 def reModulo(num,div,modby):
   [_,remain]=divPoly(num,div)
