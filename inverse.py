@@ -133,7 +133,7 @@ def extEuclidPoly(a,b):
 #      n = random.randint(-1, 2)
 #      f.append(n)
 # f = [-1, 0, 0, 0, 1, -1, 1, -1, 1, 0, 0, 0, 1, 0, 0, 0, 0]
-# q=6
+# q=7
 # N=len(f)
 
 # D=[0]*(N+1)

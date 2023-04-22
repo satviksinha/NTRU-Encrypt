@@ -1,21 +1,22 @@
-import Main.inverse as inverse
+import inverse as inverse
 import  rand as rand
 import polArithmetic as polArithmetic
+import time
 
 def key_gen(df,dg,deg,q,p):
     f = rand.randpol(df, df - 1, deg + 1)
-    # print("f is:",f)
     g = rand.randpol(dg, dg, deg + 1)
-    # print("g is:",g)
+    print("f is:",f)
+    print("g is:",g)
     N = len(f)
     D = [0]*(N+1)
     D[0] = -1
     D[N] = 1
     [gcd_f,s_f,t_f] = inverse.extEuclidPoly(f,D)
     finvp = inverse.modPoly(s_f,p)
-    # print("finvp is:",finvp)
     finvq = inverse.modPoly(s_f,q)
-    # print("finvq is:",finvq)
+    print("finvp is:",finvp)
+    print("finvq is:",finvq)
     while finvp is None or finvq is None:
         f = rand.randpol(df, df - 1, deg + 1)
         [gcd_f,s_f,t_f] = inverse.extEuclidPoly(f,D)
@@ -23,7 +24,10 @@ def key_gen(df,dg,deg,q,p):
         finvq = inverse.modPoly(s_f,q)
     for i in range(len(g)):
         g[i] = g[i]*p
+    # print("g changed is:",g)
+    inverse.resize(g,finvq)
     h = polArithmetic.star_multiply(g,finvq,q)
+    # print("h is:",h)
     pk = [f,finvp]
     return h,pk
 
@@ -55,33 +59,58 @@ q = int(input("Enter q:"))
 dr = int(input("Enter dr:"))
 df = int(input("Enter df:"))
 dg = int(input("Enter dg:"))
-# N = 17,dg = 5,df = 5,q = 6,p = 3,dr = 6 for testing
+
+#start time
+start = time.time()
 
 [pub,priv] = key_gen(df,dg,N - 1,q,p)
+
+#end time
+end = time.time()
+print("elapsed time is:",end - start,"seconds")
+# print("pub is:",pub)
+# print("priv is:",priv)
+# msg = [0,1,0,1,1]
 n = int(input("Enter the length of message:"))
 msg = []
 for i in range(n):
     msg.append(int(input()))
-blocks = []
-ciphertext = []
-if(len(msg)<N):
-    inverse.resize(msg,pub)
-    blocks.append(msg)
-else:
-    for i in range(0,len(msg),N):
-        if(i+N <= len(msg)):
-            blocks.append(msg[i:i+N])
-    if(len(msg) % N):
-        inverse.resize(msg[i:len(msg)],pub)
-        blocks.append(msg[i:i+N])
+ciphertext = encrypt(pub,dr,msg,q,N - 1)
+print("ciphertext:",ciphertext)
+decrypt = decrypt(priv,ciphertext,p,q)[0:len(msg)]
+# change 2 to -1 in msg by iterating thrugh it
+print("decrypted:",decrypt)
+# blocks = []
+# ciphertext = []
+# if(len(msg)<N):
+#     inverse.resize(msg,pub)
+#     blocks.append(msg)
+# else:
+#     for i in range(0,len(msg),N):
+#         if(i+N <= len(msg)):
+#             blocks.append(msg[i:i+N])
+#     if(len(msg) % N):
+#         inverse.resize(msg[i:len(msg)],pub)
+#         blocks.append(msg[i:i+N])
 
+# for i in range (0,len(blocks)):
+#     ciphertext.append(encrypt(pub,dr,blocks[i],q,N - 1))
+#     print("Original message: ",blocks[i])
+#     print("ciphertext[" ,i,"] : ",ciphertext[i])
+#     if(len(blocks[i]) < len(ciphertext[i])):
+#         print("Decrypted message: ",decrypt(priv,ciphertext[i],p,q)[0:len(blocks[i])])
+#     else:
+#         print("Decrypted message: ",decrypt(priv,ciphertext[i],p,q))
 
-for i in range (0,len(blocks)):
-    ciphertext.append(encrypt(pub,dr,blocks[i],q,N - 1))
-    print("Original message: ",blocks[i])
-    print("ciphertext[" ,i,"] : ",ciphertext[i])
-    if(len(blocks[i]) < len(ciphertext[i])):
-        print("Decrypted message: ",decrypt(priv,ciphertext[i],p,q)[0:len(blocks[i])])
-    else:
-        print("Decrypted message: ",decrypt(priv,ciphertext[i],p,q))
+#intel i7/i9 processors recommended
+
+##recorded times
+# N = 31,p=3,q=32 :- time = 0.09404826164245605 seconds
+# N = 41,p=3,q=32 :- time = 0.33559703826904297 seconds
+# N = 51,p=3,q=32 :- time = 0.9701879024505615 seconds
+# N = 61,p=3,q=32 :- time = 4.295067071914673 seconds
+# N = 71,p=3,q=32 :- time = 9.976176261901855 seconds
+# N = 81,p=3,q=32 :- time = 18.92745542526245 seconds
+# N = 91,p=3,q=32 :- time = 60.08960580825806 seconds
+# N = 101,p=3,q=32 :- time = 102.63305878639221 seconds
 
