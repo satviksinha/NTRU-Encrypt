@@ -15,17 +15,21 @@ def key_gen(df,dg,deg,q,p):
     [gcd_f,s_f,t_f] = inverse.extEuclidPoly(f,D)
     finvp = inverse.modPoly(s_f,p)
     finvq = inverse.modPoly(s_f,q)
-    print("finvp is:",finvp)
-    print("finvq is:",finvq)
-    while finvp is None or finvq is None:
+    # print("finvp is:",finvp)
+    # print("finvq is:",finvq)
+    while any(x is None for x in finvp) or any(x is None for x in finvq) or finvp is None or finvq is None or all(x == 0 for x in finvp) or all(x == 0 for x in finvq):
+        print("inside while")
         f = rand.randpol(df, df - 1, deg + 1)
         [gcd_f,s_f,t_f] = inverse.extEuclidPoly(f,D)
         finvp = inverse.modPoly(s_f,p)
         finvq = inverse.modPoly(s_f,q)
+    print("finvp is:",finvp)
+    print("finvq is:",finvq)
     for i in range(len(g)):
         g[i] = g[i]*p
     # print("g changed is:",g)
-    inverse.resize(g,finvq)
+    # if(len(g) == len(finvq)):
+    #     print("same size")
     h = polArithmetic.star_multiply(g,finvq,q)
     # print("h is:",h)
     pk = [f,finvp]
@@ -36,7 +40,6 @@ def key_gen(df,dg,deg,q,p):
 def encrypt(h,dr,msg,q,deg):
     r = rand.randpol(dr, dr, deg + 1)
     temp = polArithmetic.star_multiply(h,r,q)
-    [msg,temp] = inverse.resize(msg,temp)
     e = polArithmetic.polAdd(msg,temp,q)
     return e
 
